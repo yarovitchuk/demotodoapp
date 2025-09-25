@@ -7,6 +7,7 @@ import com.example.demo.repository.TodoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -38,11 +39,8 @@ public class TodoService {
             return null;
         }
 
-        Todo todo = repository.findById(id);
-        if (todo == null) {
-            // throw TodoNotFoundException(id);
-            return null;
-        }
+        Todo todo = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Todo not found"));
 
         todo.setDescription(todoRequest.getDescription());
 
@@ -51,11 +49,8 @@ public class TodoService {
     }
 
     public Todo complete(UUID id) {
-        Todo todo = repository.findById(id);
-        if (todo == null) {
-            // throw TodoNotFoundException(id);
-            return null;
-        }
+        Todo todo = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Todo not found"));
 
         if (todo.isCompleted()) {
             // throw TodoAlreadyCompletedException(id);
@@ -74,5 +69,13 @@ public class TodoService {
 
     public List<Todo> getAll() {
         return repository.getAll();
+    }
+
+    public Optional<Todo> findById(UUID id) {
+        return repository.findById(id);
+    }
+
+    public List<Todo> getByDescription(String description) {
+        return repository.findByDescription(description);
     }
 }

@@ -7,6 +7,7 @@ import com.example.demo.service.TodoService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -42,5 +43,15 @@ public class TodoController {
     @GetMapping("/all")
     public List<Todo> getAll() {
         return todoService.getAll();
+    }
+
+    @GetMapping("/{id}")
+    public Optional<Todo> getById(@PathVariable UUID id) {
+        return todoService.findById(id);
+    }
+
+    @GetMapping("/by-description/{description}")
+    public List<Todo> getByDescription(@PathVariable String description) {
+        return todoService.getByDescription(description);
     }
 }
