@@ -2,12 +2,16 @@ package com.example.demo.service;
 
 import com.example.demo.api.CreateTodoRequest;
 import com.example.demo.api.UpdateTodoRequest;
+import com.example.demo.exception.CreateRequestIsInvalid;
+import com.example.demo.exception.TodoAlreadyCompletedException;
+import com.example.demo.exception.TodoNotFoundException;
+import com.example.demo.exception.UpdateRequestIsInvalid;
 import com.example.demo.model.Todo;
+import com.example.demo.model.TodoStatus;
 import com.example.demo.repository.TodoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -21,13 +25,13 @@ public class TodoService {
 
     public Todo create(CreateTodoRequest todoRequest) {
         if (todoRequest.getDescription() == null || todoRequest.getDescription().isEmpty()) {
-            return null;
+            throw new CreateRequestIsInvalid();
         }
 
         var todo = new Todo(
                 UUID.randomUUID(),
                 todoRequest.getDescription(),
-                false
+                TodoStatus.ACTIVE
         );
 
         repository.save(todo);
@@ -36,11 +40,11 @@ public class TodoService {
 
     public Todo update(UUID id, UpdateTodoRequest todoRequest) {
         if (todoRequest.getDescription() == null || todoRequest.getDescription().isEmpty()) {
-            return null;
+            throw new UpdateRequestIsInvalid();
         }
 
         Todo todo = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Todo not found"));
+                .orElseThrow(() -> new TodoNotFoundException(id));
 
         todo.setDescription(todoRequest.getDescription());
 
@@ -50,14 +54,13 @@ public class TodoService {
 
     public Todo complete(UUID id) {
         Todo todo = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Todo not found"));
+                .orElseThrow(() -> new TodoNotFoundException(id));
 
-        if (todo.isCompleted()) {
-            // throw TodoAlreadyCompletedException(id);
-            return null;
+        if (todo.getStatus() == TodoStatus.COMPLETED) {
+            throw new TodoAlreadyCompletedException(id);
         }
 
-        todo.setIsCompleted(true);
+        todo.setStatus(TodoStatus.COMPLETED);
 
         repository.save(todo);
         return todo;
@@ -71,8 +74,8 @@ public class TodoService {
         return repository.getAll();
     }
 
-    public Optional<Todo> findById(UUID id) {
-        return repository.findById(id);
+    public Todo findById(UUID id) {
+        return repository.findById(id).orElseThrow(() -> new TodoNotFoundException(id));
     }
 
     public List<Todo> getByDescription(String description) {

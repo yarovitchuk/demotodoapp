@@ -1,3 +1,5 @@
 databaseChangeLog:
   - include:
       file: liquibase/migrations/add-todo.sql
+  - include:
+      file: liquibase/migrations/add-status.sql
