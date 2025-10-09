@@ -7,7 +7,6 @@ import com.example.demo.service.TodoService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -46,7 +45,7 @@ public class TodoController {
     }
 
     @GetMapping("/{id}")
-    public Optional<Todo> getById(@PathVariable UUID id) {
+    public Todo getById(@PathVariable UUID id) {
         return todoService.findById(id);
     }
 

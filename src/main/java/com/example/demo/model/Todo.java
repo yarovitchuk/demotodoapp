@@ -5,12 +5,12 @@ import java.util.UUID;
 public class Todo {
     private UUID id;
     private String description;
-    private Boolean isCompleted;
+    private TodoStatus status;
 
-    public Todo(UUID id, String description, Boolean isCompleted) {
+    public Todo(UUID id, String description, TodoStatus status) {
         this.id = id;
         this.description = description;
-        this.isCompleted = isCompleted;
+        this.status = status;
     }
 
     public UUID getId() {
@@ -29,11 +29,11 @@ public class Todo {
         this.description = description;
     }
 
-    public Boolean isCompleted() {
-        return isCompleted;
+    public TodoStatus getStatus() {
+        return status;
     }
 
-    public void setIsCompleted(Boolean completed) {
-        isCompleted = completed;
+    public void setStatus(TodoStatus status) {
+        this.status = status;
     }
 }

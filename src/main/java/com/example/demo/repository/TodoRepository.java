@@ -1,6 +1,7 @@
 package com.example.demo.repository;
 
 import com.example.demo.model.Todo;
+import com.example.demo.model.TodoStatus;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -18,29 +19,28 @@ public class TodoRepository {
             new Todo(
                     UUID.fromString(rs.getString("id")),
                     rs.getString("description"),
-                    rs.getBoolean("is_completed")
+                    TodoStatus.valueOf(rs.getString("status"))
             );
 
     public TodoRepository(NamedParameterJdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-
     public void save(Todo todo) {
         //language=sql
         var sql = """
-                INSERT INTO todo(id, description, is_completed)
-                VALUES (:id, :description, :is_completed)
+                INSERT INTO todo(id, description, status)
+                VALUES (:id, :description, :status::TODO_STATUS)
                 ON CONFLICT (id)
                 DO UPDATE SET
                     description = :description,
-                    is_completed = :is_completed
+                    status = :status::TODO_STATUS
                 """;
 
         Map<String, Object> parameters = Map.of(
                 "id", todo.getId(),
                 "description", todo.getDescription(),
-                "is_completed", todo.isCompleted()
+                "status", todo.getStatus().name()
         );
 
         jdbcTemplate.update(sql, parameters);
@@ -48,7 +48,7 @@ public class TodoRepository {
 
     public Optional<Todo> findById(UUID id) {
         //language=sql
-        String sql = "SELECT t.id, t.description, t.is_completed FROM todo t WHERE t.id = :id";
+        String sql = "SELECT t.id, t.description, t.status FROM todo t WHERE t.id = :id";
 
         Map<String, Object> parameters = Map.of("id", id);
 
@@ -74,7 +74,7 @@ public class TodoRepository {
 
     public List<Todo> getAll() {
         //language=sql
-        var sql = "SELECT t.id, t.description, t.is_completed FROM todo t";
+        var sql = "SELECT t.id, t.description, t.status FROM todo t";
 
         return jdbcTemplate.query(
                 sql,
@@ -86,7 +86,7 @@ public class TodoRepository {
     public List<Todo> findByDescription(String description) {
         //language=sql
         var sql = """
-                    SELECT t.id, t.description, t.is_completed FROM todo t
+                    SELECT t.id, t.description, t.status FROM todo t
                     WHERE t.description LIKE :description;
                 """;
         var params = Map.of("description", "%" + description + "%");
